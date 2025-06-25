@@ -5,8 +5,8 @@ phases:
       - echo Logging in to Amazon ECR....
       - aws --version
       - aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 219400381755.dkr.ecr.eu-north-1.amazonaws.com
-      - REPOSITORY_URI=219400381755.dkr.ecr.eu-north-1.amazonaws.com/spring-demo-ecr
-      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
+      - export REPOSITORY_URI=219400381755.dkr.ecr.eu-north-1.amazonaws.com/spring-demo-ecr
+      - export IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
 build:
   commands:
     - echo Build started on `date`
@@ -23,7 +23,7 @@ post_build:
     - docker push $REPOSITORY_URI:$IMAGE_TAG
     - echo Writing image definitions file...
 
-    - DOCKER_CONTAINER_NAME=spring-demo-ecr
+    - DOCKER_CONTAINER_NAME=spring-demo-ecr-container
     - printf '[{"name":"%s","imageUri":"%s"}]' $DOCKER_CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
     - echo $DOCKER_CONTAINER_NAME
     - echo printing imagedefinitions.json
@@ -31,4 +31,4 @@ post_build:
   artifacts:
     files:
       - imagedefinitions.json
-      - target/springboot-aws-deploy-service.jar
+      - target/springboot-aws-deploy.jar
